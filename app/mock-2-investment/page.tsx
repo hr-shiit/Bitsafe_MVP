@@ -60,10 +60,10 @@ export default function Mock2Investment() {
 
   const fetchLiveData = async () => {
     try {
-      // Fetch ETH price
-      const priceResponse = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd")
+      // Fetch WBTC price
+      const priceResponse = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=wrapped-bitcoin&vs_currencies=usd")
       const priceData = await priceResponse.json()
-      setEthPrice(priceData.ethereum.usd.toFixed(2))
+      setEthPrice(priceData.wrapped_bitcoin.usd.toFixed(2))
 
       // Fetch fund balance and transaction count using Etherscan API
       const etherscanApiKey = "YourEtherscanAPIKey" // You'll need to get this from etherscan.io
@@ -126,7 +126,7 @@ export default function Mock2Investment() {
 
   const handleInvest = async () => {
     if (!investmentAmount || Number.parseFloat(investmentAmount) < 0.005) {
-      alert("Minimum investment is 0.005 ETH")
+      alert("Minimum investment is 0.005 WBTC")
       return
     }
 
@@ -139,7 +139,7 @@ export default function Mock2Investment() {
     setTransactionStatus("Preparing transaction...")
 
     try {
-      // Convert ETH amount to Wei
+      // Convert WBTC amount to Wei
       const amountInWei = (Number.parseFloat(investmentAmount) * 1e18).toString(16)
 
       setTransactionStatus("Waiting for user confirmation...")
@@ -323,7 +323,7 @@ export default function Mock2Investment() {
               </CardHeader>
               <CardContent className="grid md:grid-cols-3 gap-4">
                 <div className="text-center p-4 bg-gray-800/50 rounded-lg">
-                  <p className="text-sm text-purple-300">ETH Price</p>
+                  <p className="text-sm text-purple-300">WBTC Price</p>
                   <p className="text-xl font-bold text-green-500">${ethPrice}</p>
                 </div>
                 <div className="text-center p-4 bg-gray-800/50 rounded-lg">
@@ -332,7 +332,7 @@ export default function Mock2Investment() {
                 </div>
                 <div className="text-center p-4 bg-gray-800/50 rounded-lg">
                   <p className="text-sm text-purple-300">Fund Balance</p>
-                  <p className="text-xl font-bold text-white">{fundBalance} ETH</p>
+                  <p className="text-xl font-bold text-white">{fundBalance} WBTC</p>
                 </div>
               </CardContent>
             </Card>
@@ -389,7 +389,7 @@ export default function Mock2Investment() {
                   <div className="text-center">
                     <DollarSign className="w-8 h-8 text-blue-500 mx-auto mb-2" />
                     <p className="text-sm text-purple-300">Total Volume</p>
-                    <p className="text-xl font-bold text-white">{fundBalance} ETH</p>
+                    <p className="text-xl font-bold text-white">{fundBalance} WBTC</p>
                   </div>
                 </CardContent>
               </Card>
@@ -399,7 +399,7 @@ export default function Mock2Investment() {
                   <div className="text-center">
                     <Target className="w-8 h-8 text-purple-500 mx-auto mb-2" />
                     <p className="text-sm text-purple-300">Min. Investment</p>
-                    <p className="text-xl font-bold text-white">0.005 ETH</p>
+                    <p className="text-xl font-bold text-white">0.005 WBTC</p>
                   </div>
                 </CardContent>
               </Card>
@@ -456,7 +456,7 @@ export default function Mock2Investment() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="amount" className="text-purple-300">
-                    Investment Amount (ETH)
+                    Investment Amount (WBTC)
                   </Label>
                   <Input
                     id="amount"
@@ -468,14 +468,14 @@ export default function Mock2Investment() {
                     onChange={(e) => setInvestmentAmount(e.target.value)}
                     className="bg-gray-800/80 border-purple-600/50 focus:border-purple-500 text-white"
                   />
-                  <p className="text-xs text-purple-300">Minimum investment: 0.005 ETH</p>
+                  <p className="text-xs text-purple-300">Minimum investment: 0.005 WBTC</p>
                 </div>
 
                 {/* Gas Information */}
                 <div className="bg-gray-800/50 p-4 rounded-lg space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-purple-300">Investment Amount:</span>
-                    <span className="text-white">{investmentAmount || "0"} ETH</span>
+                    <span className="text-white">{investmentAmount || "0"} WBTC</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-purple-300">Gas Price:</span>
@@ -487,12 +487,12 @@ export default function Mock2Investment() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-purple-300">Gas Fee:</span>
-                    <span className="text-white">{calculateTransactionCost()} ETH</span>
+                    <span className="text-white">{calculateTransactionCost()} WBTC</span>
                   </div>
                   <div className="border-t border-gray-600 pt-2">
                     <div className="flex justify-between text-sm font-semibold">
                       <span className="text-purple-300">Total Cost:</span>
-                      <span className="text-white">{calculateTotalCost()} ETH</span>
+                      <span className="text-white">{calculateTotalCost()} WBTC</span>
                     </div>
                   </div>
                 </div>
@@ -541,7 +541,7 @@ export default function Mock2Investment() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-purple-300">Fund Balance:</span>
-                  <span className="text-white">{fundBalance} ETH</span>
+                  <span className="text-white">{fundBalance} WBTC</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-purple-300">Transactions:</span>

@@ -21,7 +21,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 
-const FUND_ADDRESS = "0x96ec7434c7b3d237fda43c8420fe3122350d5ab6"
+const FUND_ADDRESS = "0xad7509caa1f1d1e2b42cc115e7856f2529d6c185"
 
 declare global {
   interface Window {

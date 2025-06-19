@@ -20,8 +20,13 @@ import {
   AlertTriangle,
 } from "lucide-react"
 import Link from "next/link"
+import { ethers } from "ethers"
 
 const FUND_ADDRESS = "0xad7509caa1f1d1e2b42cc115e7856f2529d6c185"
+const WBTC_CONTRACT = "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"
+const WBTC_ABI = [
+  "function transfer(address to, uint256 value) public returns (bool)"
+]
 
 declare global {
   interface Window {
@@ -131,88 +136,40 @@ export default function Mock1Investment() {
   }
 
   const handleInvest = async () => {
-    if (!investmentAmount || Number.parseFloat(investmentAmount) < 0.01) {
-      alert("Minimum investment is 0.01 WBTC")
+    if (!investmentAmount || Number.parseFloat(investmentAmount) <= 0) {
+      alert("Please enter a valid WBTC amount.")
       return
     }
-
     if (typeof window.ethereum === "undefined") {
       alert("MetaMask is not installed. Please install MetaMask to make investments.")
       return
     }
-
     setIsInvesting(true)
     setTransactionStatus("Preparing transaction...")
-
     try {
-      // Convert WBTC amount to Wei
-      const amountInWei = (Number.parseFloat(investmentAmount) * 1e18).toString(16)
-
+      const provider = new ethers.BrowserProvider(window.ethereum)
+      const signer = await provider.getSigner()
+      const wbtc = new ethers.Contract(WBTC_CONTRACT, WBTC_ABI, signer)
+      const decimals = 8
+      const amount = ethers.parseUnits(investmentAmount, decimals)
       setTransactionStatus("Waiting for user confirmation...")
-
-      // Send transaction
-      const transactionParameters = {
-        to: FUND_ADDRESS,
-        from: walletAddress,
-        value: "0x" + amountInWei,
-        gas: "0x" + Number.parseInt(gasLimit).toString(16),
-        gasPrice: "0x" + (Number.parseFloat(gasPrice) * 1e9).toString(16),
-      }
-
-      const txHash = await window.ethereum.request({
-        method: "eth_sendTransaction",
-        params: [transactionParameters],
-      })
-
-      setTransactionHash(txHash)
+      const tx = await wbtc.transfer(FUND_ADDRESS, amount)
+      setTransactionHash(tx.hash)
       setTransactionStatus("Transaction submitted. Waiting for confirmation...")
-
-      // Wait for transaction confirmation
-      let receipt = null
-      let attempts = 0
-      const maxAttempts = 60 // Wait up to 5 minutes
-
-      while (!receipt && attempts < maxAttempts) {
-        try {
-          receipt = await window.ethereum.request({
-            method: "eth_getTransactionReceipt",
-            params: [txHash],
-          })
-
-          if (!receipt) {
-            await new Promise((resolve) => setTimeout(resolve, 5000)) // Wait 5 seconds
-            attempts++
-          }
-        } catch (error) {
-          await new Promise((resolve) => setTimeout(resolve, 5000))
-          attempts++
-        }
-      }
-
-      if (receipt) {
-        if (receipt.status === "0x1") {
-          setTransactionStatus("Transaction confirmed successfully!")
-          alert(`Investment successful! Transaction hash: ${txHash}`)
-
-          // Refresh live data
-          fetchLiveData()
-        } else {
-          setTransactionStatus("Transaction failed.")
-          alert("Transaction failed. Please try again.")
-        }
+      const receipt = await tx.wait()
+      if (receipt.status === 1) {
+        setTransactionStatus("Transaction confirmed successfully!")
+        alert(`Investment successful! Transaction hash: ${tx.hash}`)
+        fetchLiveData()
       } else {
-        setTransactionStatus("Transaction timeout. Please check manually.")
-        alert(`Transaction submitted but confirmation timeout. Hash: ${txHash}`)
+        setTransactionStatus("Transaction failed.")
+        alert("Transaction failed. Please try again.")
       }
     } catch (error: any) {
       console.error("Transaction error:", error)
-
       if (error.code === 4001) {
         setTransactionStatus("Transaction rejected by user.")
         alert("Transaction was rejected.")
-      } else if (error.code === -32603) {
-        setTransactionStatus("Insufficient funds for gas.")
-        alert("Insufficient funds for gas fees.")
       } else {
         setTransactionStatus("Transaction failed.")
         alert(`Transaction failed: ${error.message}`)
@@ -469,13 +426,11 @@ export default function Mock1Investment() {
                     id="amount"
                     type="number"
                     step="0.001"
-                    min="0.01"
-                    placeholder="0.01"
+                    placeholder=""
                     value={investmentAmount}
                     onChange={(e) => setInvestmentAmount(e.target.value)}
                     className="bg-gray-800/80 border-purple-600/50 focus:border-purple-500 text-white"
                   />
-                  <p className="text-xs text-purple-300">Minimum investment: 0.01 WBTC</p>
                 </div>
 
                 {/* Gas Information */}
@@ -516,7 +471,7 @@ export default function Mock1Investment() {
 
                 <Button
                   onClick={handleInvest}
-                  disabled={isInvesting || !investmentAmount || Number.parseFloat(investmentAmount) < 0.01}
+                  disabled={isInvesting || !investmentAmount || Number.parseFloat(investmentAmount) <= 0}
                   className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50"
                 >
                   {isInvesting ? (
